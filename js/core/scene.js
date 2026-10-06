@@ -74,35 +74,7 @@ Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, n
 scene.add(sun);
 scene.add(new THREE.AmbientLight('#ffffff', 0.18));
 
-// Table et objets autour du bocal
-const table = mk(
-  jitter(new THREE.BoxGeometry(48, 2, 34, 6, 1, 4), 0.12),
-  M('#7d5236', { roughness: 0.9 }),
-  0,
-  -1,
-  0,
-);
-table.castShadow = false;
-scene.add(table);
-(function outside() {
-  const can = new THREE.Group();
-  part(can, Cyl(1.2, 1.2, 2.8, 10), M('#f2c14e'), [0, 1.4, 0]);
-  part(can, Cyl(1.22, 1.22, 1, 10), M('#e94f37'), [0, 1.5, 0]);
-  part(can, Cyl(1.25, 1.25, 0.2, 10), M('#d9d9d9', { metalness: 0.5, roughness: 0.3 }), [0, 2.9, 0]);
-  part(can, Ico(0.08), M('#8b4f2a'), [0.4, 3.05, 0.2]);
-  part(can, Ico(0.08), M('#8b4f2a'), [-0.3, 3.05, -0.1]);
-  can.position.set(14.5, 0, -4);
-  scene.add(can);
-  const pot = new THREE.Group();
-  part(pot, Cyl(1.1, 0.8, 1.6, 8), M('#c4693d'), [0, 0.8, 0]);
-  for (let i = 0; i < 7; i++) {
-    const l = part(pot, Cone(0.35, 2.4, 4), M(pick(['#3f8f4a', '#58a65c', '#2f6f3a'])), [0, 2.2, 0]);
-    l.rotation.set(rnd(-0.6, 0.6), rnd(0, 6), rnd(-0.6, 0.6));
-    l.scale.z = 0.3;
-  }
-  pot.position.set(-15, 0, -5);
-  scene.add(pot);
-})();
+// La table, la cuisine et les objets autour du bocal sont dans js/world/kitchen.js.
 
 // Verre
 const glassGeo = new THREE.LatheGeometry(

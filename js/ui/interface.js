@@ -128,6 +128,14 @@ $('sound').onclick = e => {
   e.currentTarget.textContent = on ? 'Son activé' : 'Son';
 };
 $('unfollow').onclick = () => follow(null);
+$('renameForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (cam.follow) renameShrimp(cam.follow, $('fRename').value);
+  $('fRename').value = '';
+});
+$('scoop').onclick = () => {
+  if (cam.follow) scoopShrimp(cam.follow);
+};
 $('hitbox').onclick = e => {
   setHitboxesVisible(!hitboxesVisible);
   e.currentTarget.setAttribute('aria-pressed', hitboxesVisible);

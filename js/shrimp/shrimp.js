@@ -217,6 +217,11 @@ class Shrimp {
     }
   }
   update(dt, t) {
+    // Prise dans l'épuisette (js/world/net.js) : elle ne fait plus que gigoter.
+    if (this.scooped) {
+      this.model.rotation.x = Math.sin(t * 20) * 0.4;
+      return;
+    }
     if (!this.busy) this.think(dt, t);
     const to = _a.subVectors(this.target, this.pos);
     const d = to.length();
@@ -301,4 +306,44 @@ function separation() {
         }
       }
     }
+}
+
+/*
+ * Retire définitivement une crevette du bocal (épuisette, meurtre…).
+ * Si elle participe à une activité, celle-ci est arrêtée, sauf `exceptAct`
+ * (l'activité qui demande le retrait et qui continue sans elle).
+ */
+function removeShrimp(s, exceptAct = null) {
+  const i = shrimps.indexOf(s);
+  if (i < 0) return;
+  if (s.busy && s.busy !== exceptAct && s.busy.finish) s.busy.finish();
+  if (s.food) s.food.claims--;
+  shrimps.splice(i, 1);
+  scene.remove(s.root);
+  s.temp = [];
+  disposeObj(s.root);
+  s.tag.remove();
+  if (s.bub) s.bub.life = 0;
+  if (cam.follow === s) follow(null);
+  if (hovered === s) hovered = null;
+  s.removed = true;
+  renderList();
+  Hooks.emit('shrimp:remove', s);
+}
+
+// Change le nom d'une crevette (fiche « Renommer »).
+function renameShrimp(s, name) {
+  name = name.trim().slice(0, 28);
+  if (!name || name === s.name) return;
+  const old = s.name;
+  s.name = name;
+  s.tag.textContent = name;
+  for (const o of shrimps) {
+    if (o.friends[old] != null) {
+      o.friends[name] = o.friends[old];
+      delete o.friends[old];
+    }
+  }
+  log(`✏️ ${old} s’appelle désormais ${name}.`);
+  renderList();
 }

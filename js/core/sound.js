@@ -14,6 +14,7 @@ const Sound = {
     conga: { bpm: 128, root: 130.8, scale: [0, 2, 4, 7, 9], prog: [0, 5, 7, 5], drums: 1 },
     mystic: { bpm: 64, root: 98, scale: [0, 2, 3, 7, 8], prog: [0, 0, 8, 7], drums: 0 },
     chic: { bpm: 120, root: 116.5, scale: [0, 2, 4, 7, 9, 11], prog: [0, 9, 5, 7], drums: 1 },
+    valse: { bpm: 90, root: 130.8, scale: [0, 2, 4, 5, 7, 9, 11], prog: [0, 5, 7, 0], drums: 0 },
   },
   init() {
     if (this.ctx) return true;

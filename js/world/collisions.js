@@ -68,7 +68,7 @@ function closestSegments(p1, q1, p2, q2, out1, out2) {
 }
 
 function resolveCollisions() {
-  const list = shrimps.filter(s => s.root.visible);
+  const list = shrimps.filter(s => s.root.visible && !s.noCollide);
   for (let pass = 0; pass < COLLISION_PASSES; pass++) {
     for (const s of list) updateCapsule(s);
     let moved = false;

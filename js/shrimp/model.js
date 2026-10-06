@@ -83,7 +83,7 @@ function buildShrimp(color) {
     f.rotation.y = a;
     fan.add(f);
   }
-  return { root, model, segs, ants, eyes, legs, swims };
+  return { root, model, segs, ants, eyes, legs, swims, mats: { body, dark, pale } };
 }
 function makeHat(kind) {
   const g = new THREE.Group();

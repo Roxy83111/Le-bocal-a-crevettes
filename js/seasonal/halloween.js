@@ -11,8 +11,10 @@
  *   - petites citrouilles cachées dans chaque décor
  *   - un décor « Manoir hanté de Pincevania »
  *   - une interaction à deux : « Un bonbon ou un sort ! »
- *   - trois activités de groupe : Bal des monstres, Chasse aux bonbons, Histoires qui font peur
+ *   - quatre activités de groupe : Bal des monstres, Chasse aux bonbons, Histoires qui font peur, Meurtre au bocal
  *   - un événement aléatoire : la coupure de courant (avec fantôme)
+ *   - Gamboo, la crevette fantôme : translucide, elle traverse les autres crevettes
+ *   - le « Meurtre au bocal » (uniquement s'il y a plus de 15 crevettes)
  */
 'use strict';
 (function halloween() {
@@ -313,6 +315,49 @@
     if (tag) tag.textContent += ' · édition Halloween';
     log('🎃 Édition Halloween : costumes, chauves-souris et fantômes sont de sortie.', 'decor');
     setTimeout(() => toast('🎃 Joyeux Halloween !'), 600);
+    spawnGhostShrimp();
+  });
+
+  /* ---------- Gamboo, la crevette fantôme ---------- */
+  let ghostShrimp = null;
+  function spawnGhostShrimp() {
+    if (ghostShrimp && !ghostShrimp.removed) return;
+    const s = new Shrimp({ name: 'Gamboo le fantôme', color: '#e8f0ff', pos: V(0, YMAX - 1, 0) });
+    // Pas de costume pour un fantôme (il en est déjà un).
+    if (s.costume) {
+      s.model.remove(s.costume);
+      s.costume = null;
+    }
+    if (s.hat) {
+      s.model.remove(s.hat);
+      s.hat = null;
+    }
+    s.hatKind = 'un drap (c’est un fantôme)';
+    s.isGhost = true;
+    s.noCollide = true; // il traverse les autres crevettes
+    s.trait = 'fantôme (traverse tout)';
+    s.model.traverse(o => {
+      if (!o.isMesh) return;
+      o.material = o.material.clone();
+      Object.assign(o.material, { transparent: true, opacity: 0.45, depthWrite: false });
+      if (o.material.emissive) {
+        o.material.emissive.set('#9db4ff');
+        o.material.emissiveIntensity = 0.6;
+      }
+      o.castShadow = false;
+    });
+    ghostShrimp = s;
+    renderList();
+    log('👻 Une crevette fantôme hante le bocal : Gamboo. Elle traverse tout le monde.', 'decor');
+  }
+  Hooks.on('frame', dt => {
+    const g = ghostShrimp;
+    if (!g || g.removed) return;
+    if (dt > 0) g.model.position.y += Math.sin(simTime * 2.2) * 0.25;
+    const op = 0.3 + 0.2 * Math.sin(simTime * 1.5);
+    g.model.traverse(o => o.isMesh && (o.material.opacity = op));
+    if (dt > 0 && !g.busy && Math.random() < dt * 0.04)
+      g.say(pick(['Bouuuh…', 'Je traverse les murs, moi.', '👻', 'Qui veut un câlin glacé ?']), 2);
   });
 
   /* ---------- Sort : la crevette devient verte un moment ---------- */
@@ -649,6 +694,208 @@
         ),
       );
       return t > 16;
+    },
+  });
+
+  /* ---------- Activité de groupe : Meurtre au bocal ----------
+   * La lumière baisse, une crevette tirée au sort devient secrètement tueuse.
+   * Chaque nuit, elle peut éliminer une crevette DÉFINITIVEMENT (elle quitte le bocal).
+   * Au matin, tout le monde débat et vote. Si le vote tombe sur la tueuse, elle part en prison ;
+   * sinon, l'innocent·e accusé·e est mis·e à l'écart et la nuit suivante commence.
+   * Au bout de MURDER_NIGHTS nuits sans arrestation, la tueuse s'en sort… et reste parmi les crevettes.
+   * Ne se lance que s'il y a plus de MURDER_MIN_SHRIMPS crevettes, et plus rarement que les autres (weight 0.35).
+   */
+  const MURDER_NIGHTS = 2;
+  // Le meurtre ne se lance que s'il y a PLUS de MURDER_MIN_SHRIMPS crevettes dans le bocal.
+  const MURDER_MIN_SHRIMPS = 15;
+
+  GROUPS.push({
+    id: 'meurtre',
+    label: '🔪 Meurtre au bocal',
+    min: 7,
+    max: 12,
+    weight: 0.35,
+    canStart: () => shrimps.length > MURDER_MIN_SHRIMPS,
+    cannotStart: () => `Il faut plus de ${MURDER_MIN_SHRIMPS} crevettes dans le bocal pour un meurtre.`,
+    status: 'est suspect·e dans une affaire de meurtre',
+    noGather: true,
+    start(A) {
+      const pool = A.m.filter(s => !s.isGhost);
+      const killer = pick(pool.length ? pool : A.m);
+      Object.assign(A.data, {
+        killer,
+        alive: A.m.slice(),
+        jailed: [],
+        night: 0,
+        phase: 'night',
+        pt: 0,
+        victims: [],
+      });
+      killer.secretKiller = true;
+      lightDimTarget = 0.3;
+      log(`🔪 La nuit tombe sur le bocal. Parmi ${A.m.length} crevettes se cache un·e tueur·se…`, 'group');
+      toast('Meurtre au bocal');
+      this.startNight(A);
+    },
+    startNight(A) {
+      const D = A.data;
+      D.night++;
+      D.phase = 'night';
+      D.pt = 0;
+      D.target = null;
+      D.killed = false;
+      lightDimTarget = 0.3;
+      // Chacun s'endort à un endroit différent, près du sable.
+      D.alive.forEach((s, i) => {
+        const a = (i / D.alive.length) * Math.PI * 2 + rnd(-0.2, 0.2);
+        s.bed = V(Math.cos(a) * rnd(3, 6.5), YMIN + rnd(0, 0.8), Math.sin(a) * rnd(3, 6.5));
+        s.goTo(s.bed, 1.4);
+        s.faceObj = null;
+        s.status = 'dort (enfin… normalement)';
+      });
+      toast(`Nuit ${D.night}`);
+    },
+    play(A, t, dt) {
+      const D = A.data,
+        K = D.killer;
+      D.pt += dt;
+      // Prisonniers : à l'écart, en haut du bocal
+      D.jailed.forEach((s, i) => {
+        s.goTo(V(-5 + i * 1.6, YMAX - 0.5, -3), 1.2);
+        s.pose.curl = -0.3;
+      });
+
+      if (D.phase === 'night') {
+        D.alive.forEach(s => {
+          if (s !== K || !D.target) {
+            s.pose.curl = -0.5;
+            if (Math.random() < dt * 0.2) emit(s.headPos(), 'z', { cls: 'zz', v: V(0.2, 0.5, 0) });
+          }
+        });
+        if (D.pt > 2.5 && !D.target) {
+          const victims = D.alive.filter(s => s !== K && !s.isGhost);
+          if (victims.length) {
+            D.target = pick(victims);
+            K.pose.curl = 0;
+            K.status = 'dort (enfin… normalement)';
+          }
+        }
+        if (D.target && !D.killed) {
+          // La tueuse s'approche lentement…
+          K.goTo(D.target.pos, 0.9);
+          K.faceObj = D.target;
+          if (K.pos.distanceTo(D.target.pos) < 1.4) {
+            D.killed = true;
+            const v = D.target;
+            v.dead = true;
+            v.status = 'est mort·e';
+            for (let i = 0; i < 4; i++) emit(v.headPos(), pick(['🔪', '💥']), { life: 1 });
+            Sound.pop();
+            v.say('…!', 1);
+            D.alive.splice(D.alive.indexOf(v), 1);
+            D.victims.push(v);
+            D.deadT = D.pt;
+            K.goTo(K.bed, 1.4);
+            K.faceObj = null;
+          }
+        }
+        // La victime remonte lentement, ventre en l'air, puis quitte le bocal pour toujours.
+        if (D.killed) {
+          const v = D.victims[D.victims.length - 1];
+          if (!v.removed) {
+            v.pose.roll = Math.PI;
+            v.pose.curl = -0.8;
+            v.goTo(V(v.pos.x, YMAX, v.pos.z), 0.35);
+            if (D.pt - D.deadT > 3.5) removeShrimp(v, A);
+          }
+          if (D.pt - D.deadT > 4.5) {
+            D.phase = 'day';
+            D.pt = 0;
+            lightDimTarget = 1;
+            D.alive.forEach(s => (s.pose.curl = 0));
+            log(`💀 Au petit matin, ${v.name} a été retrouvé·e sans vie.`);
+            toast(`${v.name} a été tué·e !`);
+          }
+        }
+        if (!D.target && D.pt > 6) {
+          D.phase = 'day';
+          D.pt = 0;
+        }
+        return false;
+      }
+
+      if (D.phase === 'day') {
+        // Débat en cercle
+        const n = D.alive.length;
+        D.alive.forEach((s, i) => {
+          const a = (i / n) * Math.PI * 2;
+          s.goTo(V(Math.cos(a) * 3, 3, Math.sin(a) * 3), 1.6);
+          s.faceObj = V(0, 3, 0);
+          s.status = 'mène l’enquête';
+        });
+        if (D.pt > 1.5 && D.pt < 7 && Math.random() < dt * 1.3) {
+          const s = pick(D.alive),
+            other = pick(D.alive.filter(o => o !== s)) || s;
+          s.say(
+            pick([
+              `C’est forcément ${other.name} !`,
+              'Moi je dormais, je le jure.',
+              `${other.name} avait l’air louche hier…`,
+              'Et si c’était le chat ?',
+              'Je dis que c’est le caillou.',
+              'Personne ne quitte le bocal !',
+            ]),
+            1.8,
+          );
+        }
+        if (D.pt > 8 && !D.voted) {
+          D.voted = true;
+          // Plus les nuits passent, plus la tueuse est soupçonnée.
+          const p = 0.3 + 0.2 * D.night;
+          const accused = Math.random() < p ? K : pick(D.alive.filter(s => s !== K));
+          D.accused = accused;
+          D.alive.forEach(s => s !== accused && (s.faceObj = accused));
+          accused.say('Quoi ?! Moi ?!', 1.8);
+          log(`🗳️ Le bocal vote : ${accused.name} est accusé·e.`);
+        }
+        if (D.voted && D.pt > 10.5 && !D.resolved) {
+          D.resolved = true;
+          const a = D.accused;
+          if (a === K) {
+            K.say('…D’accord. C’était moi.', 2.4);
+            log(`🎯 ${K.name} était bien le/la tueur·se ! Direction la prison du bocal.`, 'group');
+            toast(`${K.name} était le/la tueur·se !`);
+            D.caught = true;
+          } else {
+            a.say('Je suis innocent·e !!', 2);
+            log(`😬 ${a.name} était innocent·e… et le/la tueur·se court toujours.`);
+          }
+          D.alive.splice(D.alive.indexOf(a), 1);
+          D.jailed.push(a);
+          a.status = a === K ? 'est en prison' : 'est mis·e à l’écart (innocent·e)';
+          D.resT = D.pt;
+        }
+        if (D.resolved && D.pt > D.resT + 2.5) {
+          D.voted = D.resolved = false;
+          if (D.caught) return true;
+          if (D.night >= MURDER_NIGHTS || D.alive.length <= 3) {
+            log(`🕵️ Le/la tueur·se n’a jamais été démasqué·e… et vit toujours parmi vous.`, 'group');
+            toast('Le tueur court toujours…');
+            K.secretKiller = true;
+            return true;
+          }
+          this.startNight(A);
+        }
+        return false;
+      }
+      return false;
+    },
+    end(A) {
+      lightDimTarget = 1;
+      A.m.forEach(s => {
+        delete s.bed;
+        if (A.data.caught) delete s.secretKiller;
+      });
     },
   });
 })();

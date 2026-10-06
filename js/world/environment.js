@@ -3,6 +3,10 @@
  */
 'use strict';
 let simTime = 0;
+// Variateur de lumière global : une activité (ex. le meurtre) peut baisser la lumière
+// en réglant lightDimTarget (1 = normal, 0.3 = presque noir). Le retour se fait en douceur.
+let lightDim = 1,
+  lightDimTarget = 1;
 function hourNow() {
   return ((8 * 60 + simTime * 2) % 1440) / 60;
 }
@@ -28,9 +32,10 @@ function environment(dt) {
   }
   const h = hourNow(),
     f = 0.5 + 0.5 * Math.cos(((h - 13) / 24) * Math.PI * 2);
-  sun.intensity = 0.3 + 0.45 * f;
-  hemi.intensity = 0.4 + 0.3 * f;
-  rayMat.opacity = 0.015 + 0.045 * f;
+  lightDim += (lightDimTarget - lightDim) * (1 - Math.exp(-dt * 2));
+  sun.intensity = (0.3 + 0.45 * f) * lightDim;
+  hemi.intensity = (0.4 + 0.3 * f) * (0.35 + 0.65 * lightDim);
+  rayMat.opacity = (0.015 + 0.045 * f) * lightDim;
   rays.forEach((r, i) => {
     r.rotation.y += dt * 0.05;
     r.scale.x = r.scale.z = 1 + Math.sin(simTime * 0.7 + i) * 0.15;

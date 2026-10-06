@@ -2,6 +2,8 @@
  * Caméra orbitale : glisser pour tourner, molette/pincer pour zoomer, clic pour suivre une crevette.
  */
 'use strict';
+// Distance maximale : la caméra reste dans la cuisine.
+const CAM_MAX_DIST = 38;
 const cam = { th: 0.6, ph: 1.13, dist: 27, target: V(0, 5.2, 0), follow: null, idle: 0 };
 const pointers = new Map();
 let drag = null,
@@ -53,7 +55,7 @@ canvas.addEventListener('pointermove', e => {
     p.x = e.clientX;
     p.y = e.clientY;
     const d1 = Math.hypot(a.x - b.x, a.y - b.y);
-    if (d1 > 0) cam.dist = clamp((cam.dist * d0) / d1, 6, 48);
+    if (d1 > 0) cam.dist = clamp((cam.dist * d0) / d1, 6, CAM_MAX_DIST);
     drag.moved += 10;
     return;
   }
@@ -80,7 +82,7 @@ canvas.addEventListener(
   'wheel',
   e => {
     e.preventDefault();
-    cam.dist = clamp(cam.dist * Math.exp(e.deltaY * 0.001), 6, 48);
+    cam.dist = clamp(cam.dist * Math.exp(e.deltaY * 0.001), 6, CAM_MAX_DIST);
     cam.idle = 0;
   },
   { passive: false },
@@ -94,6 +96,8 @@ window.addEventListener('keydown', e => {
   }
 });
 const _tgt = V(0, 5.2, 0);
+const _camRay = new THREE.Raycaster(),
+  _camDir = V();
 function updateCamera(rdt) {
   cam.idle += rdt;
   if (!cam.follow && cam.idle > 5 && !reduceMotion) cam.th += rdt * 0.045;
@@ -104,6 +108,16 @@ function updateCamera(rdt) {
     cam.target.y + Math.cos(cam.ph) * cam.dist,
     cam.target.z + s * Math.sin(cam.th) * cam.dist,
   );
+  // Si une chaise (ou un autre obstacle) se trouve entre la cible et la caméra, la caméra s'arrête devant.
+  if (typeof cameraBlockers !== 'undefined' && cameraBlockers.length) {
+    _camDir.subVectors(camera.position, cam.target);
+    const d = _camDir.length();
+    _camRay.set(cam.target, _camDir.divideScalar(d));
+    _camRay.far = d;
+    const hit = _camRay.intersectObjects(cameraBlockers, true)[0];
+    if (hit) camera.position.copy(cam.target).addScaledVector(_camDir, Math.max(2, hit.distance - 1));
+  }
   if (camera.position.y < 0.6) camera.position.y = 0.6;
+  if (camera.position.y > ROOM.ceiling - 2) camera.position.y = ROOM.ceiling - 2;
   camera.lookAt(cam.target);
 }

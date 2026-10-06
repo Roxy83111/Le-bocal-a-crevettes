@@ -47,7 +47,15 @@
     <dt>Interactions</dt><dd id="fCount">0</dd>
     <dt>Meilleur·e ami·e</dt><dd id="fFriend">—</dd>
   </dl>
-  <button id="unfollow">Lâcher la caméra</button>
+  <form id="renameForm" class="rename">
+    <label for="fRename" class="visually-hidden">Nouveau nom</label>
+    <input id="fRename" maxlength="28" placeholder="Nouveau nom" autocomplete="off">
+    <button type="submit">Renommer</button>
+  </form>
+  <div class="focus-actions">
+    <button id="unfollow">Lâcher la caméra</button>
+    <button id="scoop" class="danger">Épuisette</button>
+  </div>
 </section>
 
 <div id="toast"></div>
@@ -78,6 +86,7 @@
 <script src="js/core/utils.js"></script>
 <script src="js/core/hooks.js"></script>
 <script src="js/core/scene.js"></script>
+<script src="js/core/names.js"></script>
 <script src="js/core/data.js"></script>
 <script src="js/core/sound.js"></script>
 
@@ -87,10 +96,14 @@
 <!-- Crevettes -->
 <script src="js/shrimp/model.js"></script>
 <script src="js/shrimp/shrimp.js"></script>
+<script src="js/shrimp/jeb.js"></script>
 
 <!-- Monde -->
 <script src="js/world/pellets.js"></script>
 <script src="js/world/collisions.js"></script>
+<script src="js/world/kitchen.js"></script>
+<script src="js/world/cat.js"></script>
+<script src="js/world/net.js"></script>
 
 <!-- Activités (à deux puis en groupe) -->
 <script src="js/activities/core.js"></script>
@@ -112,6 +125,14 @@
 <script src="js/activities/groups/ballet.js"></script>
 <script src="js/activities/groups/magie.js"></script>
 <script src="js/activities/groups/anniversaire.js"></script>
+<script src="js/activities/groups/classique.js"></script>
+<script src="js/activities/groups/cuisine.js"></script>
+<script src="js/activities/groups/corde.js"></script>
+<script src="js/activities/groups/karaoke.js"></script>
+<script src="js/activities/groups/bowling.js"></script>
+<script src="js/activities/groups/artifice.js"></script>
+<script src="js/activities/groups/batailles.js"></script>
+<script src="js/activities/groups/parcours.js"></script>
 <script src="js/activities/scheduler.js"></script>
 
 <!-- Décors -->
@@ -124,6 +145,15 @@
 <script src="js/decors/themes/disco.js"></script>
 <script src="js/decors/themes/zen.js"></script>
 <script src="js/decors/themes/bureau.js"></script>
+<script src="js/decors/themes/volcan.js"></script>
+<script src="js/decors/themes/champignons.js"></script>
+<script src="js/decors/themes/avantposte.js"></script>
+<script src="js/decors/themes/tropical.js"></script>
+<script src="js/decors/themes/foraine.js"></script>
+<script src="js/decors/themes/banquise.js"></script>
+<script src="js/decors/themes/labo.js"></script>
+<script src="js/decors/themes/farwest.js"></script>
+<script src="js/decors/themes/ville.js"></script>
 <script src="js/decors/manager.js"></script>
 
 <!-- Environnement, caméra, interface -->

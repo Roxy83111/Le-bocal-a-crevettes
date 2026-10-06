@@ -19,38 +19,8 @@ const COLORS = [
   '#ff595e',
   '#06d6a0',
 ];
-const NAMES = shuffle([
-  'Gaston',
-  'Crevettine',
-  'Bernard',
-  'Lulu',
-  'Krill Bill',
-  'Scampi',
-  'Pépite',
-  'Jean-Crustacé',
-  'Mme Bouquet',
-  'Chipolata',
-  'Zigoto',
-  'Pistache',
-  'Biscotte',
-  'Gribouille',
-  'Nénette',
-  'Capitaine Rose',
-  'Dédé',
-  'Paillette',
-  'Moustache',
-  'Gambette',
-  'Tartiflette',
-  'Coquillette',
-  'Bubulle',
-  'Professeur Pince',
-  'Fifi',
-  'Caramel',
-  'Popcorn',
-  'Mimosa',
-  'Sardine (vexée)',
-  'Patrick',
-]);
+// Les noms sont dans js/core/names.js (facile à modifier).
+const NAMES = shuffle(SHRIMP_NAMES.filter(n => n.trim()).slice());
 let nameIdx = 0;
 const nextName = () => (nameIdx < NAMES.length ? NAMES[nameIdx++] : 'Crevette n°' + ++nameIdx);
 const TRAITS = [

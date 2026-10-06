@@ -5,6 +5,7 @@
  * Événements disponibles :
  *   'start'                     une fois, quand le bocal est prêt
  *   'shrimp:create' (shrimp)    à chaque nouvelle crevette
+ *   'shrimp:remove' (shrimp)    quand une crevette quitte le bocal (épuisette, meurtre…)
  *   'decor:change'  (D, theme)  à chaque nouveau décor (D.group, D.hide, D.ticks)
  *   'tick'          (dt)        à chaque pas de simulation (temps simulé)
  *   'frame'         (dt, rdt)   à chaque image, juste avant le rendu

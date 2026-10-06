@@ -36,22 +36,38 @@ function schedule(dt) {
       return;
     }
     const free = shrimps.filter(s => !s.busy);
-    const cands = GROUPS.filter(g => free.length >= g.min && g.id !== lastGroup);
+    const cands = GROUPS.filter(
+      g => free.length >= g.min && g.id !== lastGroup && (!g.canStart || g.canStart()),
+    );
     if (cands.length) {
-      const def = pick(cands);
+      const def = pickWeighted(cands);
       const n = clamp(rint(def.min, def.max), def.min, free.length);
       startGroup(def, shuffle(free).slice(0, n));
       groupTimer = rnd(35, 55);
     } else groupTimer = 5;
   }
 }
+// Tirage au sort pondéré : une activité avec weight: 0.3 sort 3 fois moins souvent (1 par défaut).
+function pickWeighted(list) {
+  const total = list.reduce((s, g) => s + (g.weight ?? 1), 0);
+  let r = Math.random() * total;
+  for (const g of list) {
+    r -= g.weight ?? 1;
+    if (r <= 0) return g;
+  }
+  return list[list.length - 1];
+}
 function forceGroup(def) {
   if (shrimps.length < def.min) {
     toast(`Il faut au moins ${def.min} crevettes`);
     return;
   }
+  if (def.canStart && !def.canStart()) {
+    toast(def.cannotStart ? def.cannotStart() : 'Impossible de lancer cette activité maintenant');
+    return;
+  }
   acts.slice().forEach(a => a.finish());
-  const all = shuffle(shrimps.slice());
+  const all = shuffle(shrimps.filter(s => !s.scooped));
   const n = clamp(rint(def.min, def.max), def.min, all.length);
   startGroup(def, all.slice(0, n));
   groupTimer = rnd(40, 60);

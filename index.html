@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le Bocal à Crevettes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Lexend:wght@300;400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/scene-labels.css">
+<link rel="stylesheet" href="css/hud.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<canvas id="scene" aria-label="Bocal en 3D où vivent des crevettes"></canvas>
+<div id="labels"></div>
+
+<header id="brand">
+  <div class="logo">Le Bocal<small>Simulation de vie de crevettes</small></div>
+  <div class="meta"><span id="clock">Jour 1 · 08:00</span><span id="pop">0 crevettes</span></div>
+  <div class="decor-card">
+    <span class="k">Décor actuel</span>
+    <span id="decorName">…</span>
+    <div class="bar" title="Prochain changement de décor"><i id="decorBar"></i></div>
+  </div>
+  <div class="hint">Glisser pour tourner · molette pour zoomer · clic sur une crevette pour la suivre</div>
+</header>
+
+<aside id="side" aria-label="Journal du bocal">
+  <div class="tabs">
+    <button id="tabLog" class="on">Journal</button>
+    <button id="tabList">Crevettes</button>
+    <button id="sideClose" class="icon" aria-label="Fermer le panneau">✕</button>
+  </div>
+  <ol id="log"></ol>
+  <ul id="list" hidden></ul>
+</aside>
+<button id="sideOpen">Journal</button>
+
+<section id="focus" hidden aria-live="polite">
+  <h2 id="fName">—</h2>
+  <dl>
+    <dt>Caractère</dt><dd id="fTrait">—</dd>
+    <dt>Accessoire</dt><dd id="fHat">—</dd>
+    <dt>En ce moment</dt><dd id="fStatus">—</dd>
+    <dt>Interactions</dt><dd id="fCount">0</dd>
+    <dt>Meilleur·e ami·e</dt><dd id="fFriend">—</dd>
+  </dl>
+  <button id="unfollow">Lâcher la caméra</button>
+</section>
+
+<div id="toast"></div>
+
+<nav id="controls" aria-label="Commandes de la simulation">
+  <div class="seg" id="speed" role="group" aria-label="Vitesse">
+    <button data-s="0" aria-label="Pause">❚❚</button>
+    <button data-s="1" class="on">×1</button>
+    <button data-s="2">×2</button>
+    <button data-s="4">×4</button>
+  </div>
+  <button id="feed">Nourrir</button>
+  <button id="nextDecor">Changer de décor</button>
+  <div class="grp">
+    <select id="grpSel" aria-label="Activité de groupe"></select>
+    <button id="grpGo">Lancer</button>
+  </div>
+  <button id="add">+ Crevette</button>
+  <button id="names" aria-pressed="false">Noms</button>
+  <button id="hitbox" aria-pressed="false">Hitbox</button>
+  <button id="sound" aria-pressed="false">Son</button>
+</nav>
+
+<!-- Moteur 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Socle -->
+<script src="js/core/utils.js"></script>
+<script src="js/core/hooks.js"></script>
+<script src="js/core/scene.js"></script>
+<script src="js/core/data.js"></script>
+<script src="js/core/sound.js"></script>
+
+<!-- Interface au-dessus de la 3D -->
+<script src="js/ui/overlay.js"></script>
+
+<!-- Crevettes -->
+<script src="js/shrimp/model.js"></script>
+<script src="js/shrimp/shrimp.js"></script>
+
+<!-- Monde -->
+<script src="js/world/pellets.js"></script>
+<script src="js/world/collisions.js"></script>
+
+<!-- Activités (à deux puis en groupe) -->
+<script src="js/activities/core.js"></script>
+<script src="js/activities/pairs.js"></script>
+<script src="js/activities/props.js"></script>
+<script src="js/activities/groups/concert.js"></script>
+<script src="js/activities/groups/cache.js"></script>
+<script src="js/activities/groups/chenille.js"></script>
+<script src="js/activities/groups/pyramide.js"></script>
+<script src="js/activities/groups/foot.js"></script>
+<script src="js/activities/groups/rituel.js"></script>
+<script src="js/activities/groups/yoga.js"></script>
+<script src="js/activities/groups/defile.js"></script>
+<script src="js/activities/groups/bulle.js"></script>
+<script src="js/activities/groups/conf.js"></script>
+<script src="js/activities/groups/soleil.js"></script>
+<script src="js/activities/groups/chaises.js"></script>
+<script src="js/activities/groups/photo.js"></script>
+<script src="js/activities/groups/ballet.js"></script>
+<script src="js/activities/groups/magie.js"></script>
+<script src="js/activities/groups/anniversaire.js"></script>
+<script src="js/activities/scheduler.js"></script>
+
+<!-- Décors -->
+<script src="js/decors/helpers.js"></script>
+<script src="js/decors/themes/recif.js"></script>
+<script src="js/decors/themes/epave.js"></script>
+<script src="js/decors/themes/temple.js"></script>
+<script src="js/decors/themes/lune.js"></script>
+<script src="js/decors/themes/bonbons.js"></script>
+<script src="js/decors/themes/disco.js"></script>
+<script src="js/decors/themes/zen.js"></script>
+<script src="js/decors/themes/bureau.js"></script>
+<script src="js/decors/manager.js"></script>
+
+<!-- Environnement, caméra, interface -->
+<script src="js/world/environment.js"></script>
+<script src="js/ui/camera.js"></script>
+<script src="js/ui/interface.js"></script>
+
+<!-- Extensions saisonnières : supprimer le fichier (et cette ligne) pour les retirer -->
+<script src="js/seasonal/halloween.js"></script>
+
+<!-- Démarrage (toujours en dernier) -->
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+/* Adaptations écran étroit (téléphone) et mouvements réduits. */
+@media (max-width: 760px) {
+  .logo {
+    font-size: 28px;
+  }
+  .decor-card {
+    width: 210px;
+    padding: 7px 10px;
+  }
+  #decorName {
+    font-size: 15px;
+  }
+  .hint {
+    display: none;
+  }
+  #side {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    top: auto;
+    height: 46%;
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  }
+  #controls {
+    gap: 6px;
+    padding: 6px;
+    width: calc(100% - 32px);
+  }
+  #controls button,
+  #controls select {
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+  #focus {
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  }
+  #toast {
+    font-size: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #log li {
+    animation: none;
+  }
+  #toast {
+    transition: none;
+  }
+}

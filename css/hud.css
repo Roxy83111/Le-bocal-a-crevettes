@@ -1,0 +1,304 @@
+/* Interface : marque, panneau journal/crevettes, commandes, fiche de la crevette suivie, annonces. */
+/* Marque */
+#brand {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+  max-width: calc(100% - 32px);
+}
+.logo {
+  font: 400 38px/1 var(--f-display);
+  color: var(--coral);
+  letter-spacing: 0.01em;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+}
+.logo small {
+  display: block;
+  font: 500 11px/1.4 var(--f-body);
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+  margin-top: 4px;
+}
+.meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font: 500 12px/1 var(--f-mono);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.meta span {
+  background: var(--glass);
+  border: 1px solid var(--line);
+  padding: 6px 9px;
+  border-radius: 8px;
+}
+.decor-card {
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 12px;
+  display: grid;
+  gap: 6px;
+  width: 250px;
+  max-width: 100%;
+}
+.decor-card .k {
+  font: 600 10px/1 var(--f-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+#decorName {
+  font: 400 18px/1.15 var(--f-display);
+  color: var(--sand);
+}
+.bar {
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--sand);
+  border-radius: 4px;
+}
+.hint {
+  font: 400 11px/1.4 var(--f-body);
+  color: var(--muted);
+}
+
+/* Panneau latéral */
+#side {
+  position: fixed;
+  right: 16px;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  width: 320px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body.side-closed #side {
+  display: none;
+}
+#sideOpen {
+  position: fixed;
+  right: 16px;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  display: none;
+  background: var(--glass);
+}
+body.side-closed #sideOpen {
+  display: block;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.tabs button {
+  flex: 1;
+  padding: 8px 10px;
+}
+.tabs .icon {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+}
+#log,
+#list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 12px 12px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+#log li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font: 400 13px/1.4 var(--f-body);
+  animation: in 0.35s ease-out;
+}
+#log li time {
+  font: 500 11px/1.6 var(--f-mono);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+#log li.group span {
+  color: var(--sand);
+  font-weight: 500;
+}
+#log li.decor span {
+  color: var(--coral);
+  font-weight: 500;
+}
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+#list li button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  column-gap: 10px;
+  row-gap: 3px;
+  align-items: center;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 9px 2px;
+  white-space: normal;
+}
+#list li button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+#list li i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  transform: rotate(45deg);
+  grid-row: span 2;
+}
+#list li b {
+  font: 600 13px/1.2 var(--f-body);
+}
+#list li small {
+  font: 400 12px/1.2 var(--f-body);
+  color: var(--muted);
+}
+
+/* Commandes */
+#controls {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  max-width: calc(100% - 32px);
+  box-sizing: border-box;
+}
+.seg {
+  display: flex;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 11px;
+  padding: 2px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+.seg button.on {
+  background: var(--coral);
+  color: var(--abyss);
+}
+.grp {
+  display: flex;
+  gap: 6px;
+}
+
+/* Fiche crevette suivie */
+#focus {
+  position: fixed;
+  left: 16px;
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  width: 260px;
+  max-width: calc(100% - 32px);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+}
+#focus h2 {
+  margin: 0;
+  font: 400 24px/1.05 var(--f-display);
+  color: var(--sand);
+  text-wrap: balance;
+}
+#focus dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  font: 400 12.5px/1.35 var(--f-body);
+}
+#focus dt {
+  color: var(--muted);
+}
+#focus dd {
+  margin: 0;
+}
+#toast {
+  position: fixed;
+  left: 50%;
+  top: calc(16% + env(safe-area-inset-top, 0px));
+  transform: translate(-50%, -10px);
+  font: 400 30px/1.1 var(--f-display);
+  color: var(--sand);
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.35),
+    0 0 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+  pointer-events: none;
+  text-align: center;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  text-wrap: balance;
+}
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+#err {
+  position: fixed;
+  inset: auto 16px 50% 16px;
+  text-align: center;
+  font: 500 15px/1.5 var(--f-body);
+  color: var(--ink);
+}

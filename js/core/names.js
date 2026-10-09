@@ -40,4 +40,7 @@ const SHRIMP_NAMES = [
   'Mimosa',
   'Sardine (vexée)',
   'Patrick',
+  'Bictor',
+  'Wawann',
+  'Tako',
 ];

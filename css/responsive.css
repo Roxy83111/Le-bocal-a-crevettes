@@ -19,7 +19,7 @@
     width: auto;
     top: auto;
     height: 46%;
-    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--controls-h, 136px) + 24px + env(safe-area-inset-bottom, 0px));
   }
   #controls {
     gap: 6px;
@@ -32,7 +32,7 @@
     font-size: 12px;
   }
   #focus {
-    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--controls-h, 136px) + 24px + env(safe-area-inset-bottom, 0px));
   }
   #toast {
     font-size: 22px;

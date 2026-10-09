@@ -29,18 +29,23 @@ const JEB_DYES = [
 ].map(c => new THREE.Color(c));
 const JEB_STEP = 1; // secondes par couleur
 
-function makeJeb(s) {
+function makeJeb(s, quiet = false) {
   s.isJeb = true;
   s.name = JEB_NAME;
   s.tag.textContent = JEB_NAME;
   s.trait = 'légendaire (1 chance sur 100)';
   s.color = '#ff00aa';
+  if (quiet) return; // rechargée depuis une sauvegarde : pas d'annonce
   log('🌈 Une crevette rarissime apparaît : jeb_ !', 'decor');
   toast('🌈 jeb_ est dans le bocal !');
   setTimeout(() => s.say('🌈 Salut, je suis jeb_.', 2.5), 400);
 }
 
 Hooks.on('shrimp:create', s => {
+  if (s.loaded) {
+    if (s.loaded.jeb) makeJeb(s, true);
+    return;
+  }
   if (Math.random() < JEB_CHANCE && !shrimps.some(o => o !== s && o.isJeb)) makeJeb(s);
 });
 

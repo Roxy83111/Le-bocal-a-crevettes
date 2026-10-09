@@ -22,7 +22,16 @@ const COLORS = [
 // Les noms sont dans js/core/names.js (facile à modifier).
 const NAMES = shuffle(SHRIMP_NAMES.filter(n => n.trim()).slice());
 let nameIdx = 0;
-const nextName = () => (nameIdx < NAMES.length ? NAMES[nameIdx++] : 'Crevette n°' + ++nameIdx);
+// Prochain nom libre (saute ceux déjà portés, par exemple après le chargement d'une sauvegarde).
+function nextName() {
+  while (nameIdx < NAMES.length) {
+    const n = NAMES[nameIdx++];
+    if (!shrimps.some(s => s.name === n)) return n;
+  }
+  let k = 1;
+  while (shrimps.some(s => s.name === 'Crevette n°' + k)) k++;
+  return 'Crevette n°' + k;
+}
 const TRAITS = [
   'fêtard·e',
   'philosophe',

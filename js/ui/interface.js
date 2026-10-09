@@ -65,6 +65,14 @@ function updateFocus() {
       best = k;
     }
   $('fFriend').textContent = best ? `${best} (${bv})` : 'pas encore';
+  let rival = null,
+    rv = 0;
+  for (const k in s.friends)
+    if (s.friends[k] < rv && shrimps.some(o => o.name === k)) {
+      rv = s.friends[k];
+      rival = k;
+    }
+  $('fRival').textContent = rival ? `${rival} (${rv})` : 'personne';
   $('fName').style.color = s.color;
 }
 $('tabLog').onclick = () => {
@@ -82,6 +90,12 @@ $('tabList').onclick = () => {
 $('sideClose').onclick = () => document.body.classList.add('side-closed');
 $('sideOpen').onclick = () => document.body.classList.remove('side-closed');
 if (window.innerWidth < 760) document.body.classList.add('side-closed');
+// Hauteur réelle de la barre de commandes (elle passe sur plusieurs lignes sur téléphone) :
+// la fiche et le journal se placent juste au-dessus (voir css/responsive.css).
+const controlsEl = $('controls');
+const setControlsH = () => document.documentElement.style.setProperty('--controls-h', controlsEl.offsetHeight + 'px');
+if (window.ResizeObserver) new ResizeObserver(setControlsH).observe(controlsEl);
+setControlsH();
 let speed = 1;
 function setSpeed(v) {
   speed = v;

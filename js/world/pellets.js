@@ -8,6 +8,7 @@ pelletGeo.userData.keep = true;
 const pelletMat = M('#8b4f2a');
 pelletMat.userData.keep = true;
 function dropPellets(n, center) {
+  Hooks.emit('feed', n);
   for (let i = 0; i < n; i++) {
     const m = new THREE.Mesh(pelletGeo, pelletMat);
     m.castShadow = true;

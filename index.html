@@ -46,6 +46,7 @@
     <dt>En ce moment</dt><dd id="fStatus">—</dd>
     <dt>Interactions</dt><dd id="fCount">0</dd>
     <dt>Meilleur·e ami·e</dt><dd id="fFriend">—</dd>
+    <dt>En froid avec</dt><dd id="fRival">—</dd>
   </dl>
   <form id="renameForm" class="rename">
     <label for="fRename" class="visually-hidden">Nouveau nom</label>
@@ -77,6 +78,8 @@
   <button id="names" aria-pressed="false">Noms</button>
   <button id="hitbox" aria-pressed="false">Hitbox</button>
   <button id="sound" aria-pressed="false">Son</button>
+  <button id="saveBtn" title="Sauvegarde aussi automatiquement toutes les 30 s">Sauvegarder</button>
+  <button id="resetBtn">Nouvelle partie</button>
 </nav>
 
 <!-- Moteur 3D -->
@@ -135,6 +138,11 @@
 <script src="js/activities/groups/parcours.js"></script>
 <script src="js/activities/scheduler.js"></script>
 
+<!-- Discussions générées (procédural, hors ligne) -->
+<script src="js/dialogue/lexicon.js"></script>
+<script src="js/dialogue/engine.js"></script>
+<script src="js/dialogue/topics.js"></script>
+
 <!-- Décors -->
 <script src="js/decors/helpers.js"></script>
 <script src="js/decors/themes/recif.js"></script>
@@ -160,6 +168,7 @@
 <script src="js/world/environment.js"></script>
 <script src="js/ui/camera.js"></script>
 <script src="js/ui/interface.js"></script>
+<script src="js/ui/save.js"></script>
 
 <!-- Extensions saisonnières : supprimer le fichier (et cette ligne) pour les retirer -->
 <script src="js/seasonal/halloween.js"></script>

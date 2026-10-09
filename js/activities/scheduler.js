@@ -26,7 +26,7 @@ function schedule(dt) {
         others.sort((x, y) => x.pos.distanceTo(a.pos) - y.pos.distanceTo(a.pos));
         b = others[0];
       } else b = pick(others);
-      startPair(pick(PAIRS), a, b);
+      startPair(pickWeighted(PAIRS), a, b);
     }
   }
   groupTimer -= dt;

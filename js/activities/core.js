@@ -76,6 +76,7 @@ class Act {
     const i = acts.indexOf(this);
     if (i >= 0) acts.splice(i, 1);
     if (this.music) Sound.stopMusic();
+    Hooks.emit('act:end', this);
   }
 }
 function pairStart(A, def) {

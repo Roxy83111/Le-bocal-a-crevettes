@@ -115,6 +115,7 @@ function catVisit() {
   Cat.y = ROOM.floor;
   Cat.stopX = rnd(-6, 6);
   log(`🐈 ${Cat.name} (chat ${coat.name}) saute sur le plan de travail…`, 'decor');
+  Hooks.emit('cat:visit', Cat);
 }
 
 function catMeow() {

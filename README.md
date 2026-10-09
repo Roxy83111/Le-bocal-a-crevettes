@@ -4,6 +4,8 @@ Une simulation en 3D, entièrement en **low poly**, où une quinzaine de crevett
 posé sur la table d'une cuisine. Elles se baladent, mangent, dorment, interagissent à deux au hasard et se
 lancent dans des activités de groupe absurdes (concert, cache-cache, cours de cuisine, meurtre au bocal…).
 Le décor du bocal change régulièrement, et le chat de la maison passe parfois les surveiller.
+Les crevettes **discutent entre elles** grâce à un générateur de dialogues 100 % local, et la partie
+est **sauvegardée** automatiquement (noms, couleurs, effets, affinités).
 
 ---
 
@@ -22,6 +24,7 @@ Le décor du bocal change régulièrement, et le chat de la maison passe parfois
    - [js/shrimp](#jsshrimp)
    - [js/world](#jsworld)
    - [js/activities](#jsactivities)
+   - [js/dialogue](#jsdialogue)
    - [js/decors](#jsdecors)
    - [js/seasonal](#jsseasonal)
    - [js/main.js](#jsmainjs)
@@ -49,7 +52,10 @@ Double-clique sur `index.html` : la page s'ouvre dans ton navigateur.
 | **jeb_** | Crevette arc-en-ciel rarissime (1 chance sur 100 à chaque nouvelle crevette) dont la couleur passe d'une teinture à l'autre. |
 | **Épuisette** | Retire définitivement la crevette sélectionnée, avec une petite animation. |
 | **Vie libre** | Se balader, picorer le sable, faire la sieste (plus souvent la nuit), regarder à travers la vitre, foncer sur les granulés. |
-| **Interactions à deux** | 11 interactions aléatoires : salut, tango, dispute pour une miette, potins, saltos, câlin, pierre-feuille-ciseaux, toupie, course, philosophie, concours de regard. |
+| **Discussions générées** | Les crevettes ont de vraies conversations, générées sur place (sans internet ni IA payante) : 24 sujets (nourriture, décor, détails du décor, heure, potins, philosophie, rêves, projets, hobbies, le géant, la cuisine, le chat, blagues, défis, mue, musique, secrets, conseils, enfance, amitié, disputes, réconciliation, souvenirs, + Halloween), et près d'une discussion sur trois enchaîne deux sujets. Le contenu dépend de leur caractère, de leur affinité et de ce qui s'est passé récemment dans le bocal. Seules, elles pensent à voix haute. |
+| **Affinités** | Chaque interaction rapproche deux crevettes ; les disputes les brouillent, les réconciliations les rabibochent. La fiche montre le ou la meilleur·e ami·e et avec qui la crevette est en froid. |
+| **Sauvegarde** | Automatique (toutes les 30 s et en quittant la page) dans des cookies : noms, couleurs, jeb_, chapeaux, costumes, caractères, tailles, affinités. Rechargée au démarrage. |
+| **Interactions à deux** | 12 interactions aléatoires : discussion générée (la plus fréquente), salut, tango, dispute pour une miette, potins, saltos, câlin, pierre-feuille-ciseaux, toupie, course, philosophie, concours de regard. |
 | **Activités de groupe** | 24 activités pour 6 crevettes ou plus : concert, cache-cache, chenille, pyramide, foot, rituel, yoga, défilé, bulle géante, conférence, 1-2-3 soleil, coquillages musicaux, photo de classe, nage synchronisée, magie, anniversaire, danse classique, cours de cuisine, tir à la corde, karaoké, bowling, feu d'artifice, bataille de bulles, parcours d'obstacles. |
 | **Décors** | 17 décors (+ 1 avec Halloween) qui changent toutes les 90 secondes simulées : récif, épave, temple, base lunaire, bonbons, disco, jardin zen, bureau, volcan sous-marin, forêt de champignons, avant-poste galactique, île tropicale, fête foraine, banquise, laboratoire secret, Far West, ville engloutie. |
 | **Cuisine** | Le bocal est posé sur une table à pieds, dans une cuisine low poly : carrelage, plan de travail, gazinière qui fume, frigo, fenêtre dont le ciel suit l'heure, horloge qui tourne, suspension. |
@@ -80,6 +86,9 @@ Double-clique sur `index.html` : la page s'ouvre dans ton navigateur.
 | **Noms** | Affiche le nom de toutes les crevettes |
 | **Hitbox** | Affiche les hitbox en fil de fer |
 | **Son** | Active ou coupe le son |
+| **Sauvegarder** | Sauvegarde tout de suite (elle se fait aussi toute seule toutes les 30 s) |
+| **Nouvelle partie** | Efface la sauvegarde et recommence avec 14 nouvelles crevettes (cliquer deux fois pour confirmer) |
+| Suivre une crevette | Ses discussions s'écrivent aussi dans le journal, en italique |
 | Onglets **Journal / Crevettes** | Historique des événements, liste des crevettes (clic pour suivre) |
 
 ---
@@ -100,24 +109,25 @@ shrimp/
     ├── core/                    Socle (chargé en premier)
     │   ├── utils.js             Outils : hasard, maths, fabrication de formes
     │   ├── hooks.js             Système d'accroche pour les extensions
-│   ├── names.js             📝 Liste des noms des crevettes (à modifier librement)
+    │   ├── names.js             📝 Liste des noms des crevettes (à modifier librement)
     │   ├── scene.js             Moteur 3D, lumières, bocal, eau, sable
     │   ├── data.js              Tous les textes et listes (noms, répliques…)
     │   └── sound.js             Son génératif
     ├── ui/
     │   ├── overlay.js           Bulles, émotes et noms en HTML
     │   ├── camera.js            Caméra orbitale et suivi
-    │   └── interface.js         Journal, liste, fiche, boutons
+    │   ├── interface.js         Journal, liste, fiche, boutons
+    │   └── save.js              💾 Sauvegarde dans des cookies
     ├── shrimp/
     │   ├── model.js             Modèles 3D : crevette, chapeaux, instruments
     │   ├── shrimp.js            Classe Shrimp : mouvement, animation, vie libre, retrait, renommage
-│   └── jeb.js               jeb_, la crevette arc-en-ciel rarissime
+    │   └── jeb.js               jeb_, la crevette arc-en-ciel rarissime
     ├── world/
     │   ├── pellets.js           Granulés de nourriture
     │   ├── collisions.js        Hitbox et collisions entre crevettes
-│   ├── kitchen.js           La cuisine, la table et ses pieds
-│   ├── cat.js               Le chat qui passe de temps en temps
-│   ├── net.js               L'épuisette
+    │   ├── kitchen.js           La cuisine, la table et ses pieds
+    │   ├── cat.js               Le chat qui passe de temps en temps
+    │   ├── net.js               L'épuisette
     │   └── environment.js       Vagues, bulles, jour/nuit
     ├── activities/
     │   ├── core.js              Moteur commun à toutes les activités
@@ -125,6 +135,10 @@ shrimp/
     │   ├── props.js             Accessoires partagés (divinités, ballon…)
     │   ├── groups/              Une activité de groupe par fichier
     │   └── scheduler.js         Décide quand lancer quoi
+    ├── dialogue/                💬 Discussions générées (hors ligne)
+    │   ├── lexicon.js           📝 Vocabulaire, tics de langage, remarques par décor, blagues
+    │   ├── engine.js            Moteur : grammaire, contexte, souvenirs, interaction « discussion »
+    │   └── topics.js            Les sujets de conversation
     ├── decors/
     │   ├── helpers.js           Outils de construction de décor
     │   ├── themes/              Un décor par fichier
@@ -242,7 +256,11 @@ Objet `Hooks` qui permet à une extension de réagir aux événements sans modif
 | `start` | — | Une fois, quand le bocal est prêt. |
 | `shrimp:create` | `shrimp` | À chaque nouvelle crevette. |
 | `shrimp:remove` | `shrimp` | Quand une crevette quitte le bocal (épuisette, meurtre). |
+| `shrimp:rename` | `shrimp, ancienNom` | Quand une crevette est renommée. |
 | `decor:change` | `D, theme` | À chaque nouveau décor. |
+| `act:end` | `act` | À la fin d'une activité (`act.def`, `act.m`, `act.group`). |
+| `cat:visit` | `Cat` | Quand le chat arrive dans la cuisine. |
+| `feed` | `n` | Quand des granulés tombent dans le bocal. |
 | `tick` | `dt` | À chaque pas de simulation. |
 | `frame` | `dt, rdt` | À chaque image, avant le rendu. |
 
@@ -337,14 +355,35 @@ Gère aussi la souris, le tactile (pincer pour zoomer), la molette, `Échap` et 
 | Nom | Rôle |
 |---|---|
 | `clockStr()` | Jour et heure simulés (« Jour 1 · 08:00 »). |
-| `log(texte, type)` | Ajoute une ligne au journal (`group` en sable, `decor` en corail). Garde 90 lignes. |
+| `log(texte, type)` | Ajoute une ligne au journal (`group` en sable, `decor` en corail, `chat` en italique pour les répliques). Garde 90 lignes. |
 | `toast(message)` | Grande annonce temporaire au centre de l'écran. |
 | `renderList()` | Reconstruit la liste des crevettes. |
-| `updateFocus()` | Remplit la fiche : caractère, accessoire, activité, nombre d'interactions, meilleur·e ami·e. |
+| `updateFocus()` | Remplit la fiche : caractère, accessoire, activité, nombre d'interactions, meilleur·e ami·e, crevette avec qui elle est en froid (affinité négative). |
+| `setControlsH()` | Mesure la barre de commandes (variable CSS `--controls-h`) pour que la fiche et le journal restent au-dessus sur téléphone. |
 | `setSpeed(v)` | Change la vitesse (0 = pause). |
 | `fillGroupSelect()` | Remplit le menu des activités (au démarrage, pour inclure celles des extensions). |
 
 Il branche aussi tous les boutons : Nourrir, Changer de décor, Lancer, + Crevette, Noms, Hitbox, Son, les onglets, et dans la fiche « Renommer » et « Épuisette ».
+
+#### `save.js` — 💾 sauvegarde
+
+Enregistre la partie dans des **cookies** et la recharge au démarrage.
+
+| Nom | Rôle |
+|---|---|
+| `saveGame(manuel)` | Sauvegarde toutes les crevettes (sauf Gamboo, recréé par Halloween, et celles qui sont en train de partir). Avec `manuel = true`, affiche une annonce. |
+| `loadGame()` | Appelée par `main.js` : recrée les crevettes sauvegardées et leurs affinités. Renvoie `false` s'il n'y a pas de sauvegarde. |
+| `newGame()` | Efface la sauvegarde et recharge la page. |
+| `serialize()` / `deserialize(texte)` | Format compact (voir ci-dessous). |
+| `storeWrite`, `storeRead`, `storeClear` | Lecture/écriture dans les cookies, ou dans `localStorage` si les cookies sont bloqués. |
+| `SAVE_EVERY`, `SAVE_DAYS`, `CHUNK` | Sauvegarde automatique toutes les 30 s, cookies gardés 365 jours, 3 500 caractères par cookie. |
+
+Pour chaque crevette sont enregistrés : nom, couleur, caractère, chapeau d'origine, taille, statut jeb_, costume d'Halloween, nombre d'interactions et affinités.
+Format : `{ v: 1, s: [[nom, couleur, caractère, chapeau, taille×100, jeb, costume, interactions, {indexAutre: affinité}], …] }`.
+Le caractère et le chapeau sont stockés par leur numéro dans `TRAITS` / `HATS`, et les affinités par numéro de crevette, pour rester petit.
+Un cookie étant limité à 4 Ko, le texte est découpé en morceaux : `bocal_save_n` (nombre de morceaux), puis `bocal_save_0`, `bocal_save_1`… 30 crevettes amies avec tout le monde tiennent dans environ 5 cookies.
+
+> **Cookies et double-clic :** Chrome refuse les cookies pour une page ouverte en double-cliquant sur `index.html` (adresse en `file://`). Dans ce cas, la sauvegarde se fait dans le stockage local du navigateur (`localStorage`), et l'annonce l'indique. Sur GitHub Pages ou avec un petit serveur local, ce sont bien des cookies.
 
 ---
 
@@ -367,19 +406,20 @@ Il branche aussi tous les boutons : Nourrir, Changer de décor, Lancer, + Crevet
 
 | Propriété | Signification |
 |---|---|
-| `name`, `color`, `trait`, `size`, `hatKind` | Identité. |
+| `name`, `color`, `trait`, `size`, `hatKind`, `baseHat` | Identité (`baseHat` = chapeau d'origine, sans costume). |
 | `pos`, `vel`, `target`, `speed`, `speedMul` | Position, vitesse, destination, vitesse de base et multiplicateur. |
 | `busy` | Activité en cours (ou `null` si la crevette est libre). |
 | `faceObj` | Ce que la crevette regarde une fois arrivée (un point ou une autre crevette). |
 | `pose` | Posture voulue : `flip` (tangage), `roll` (roulis), `spin` (lacet), `hop` (rebond), `curl` (queue repliée), `ant` (antennes qui frétillent). |
 | `mode`, `status` | Comportement libre en cours et texte affiché. |
-| `friends`, `inter` | Compteur d'amitiés et nombre d'interactions. |
+| `friends`, `inter` | Affinités (nom → score, négatif = en froid) et nombre d'interactions. |
+| `loaded` | Fiche de sauvegarde si la crevette a été rechargée (sinon `null`). |
 
 **Méthodes**
 
 | Méthode | Rôle |
 |---|---|
-| `constructor(options)` | Crée la crevette (nom, couleur, chapeau éventuel, position) et déclenche `shrimp:create`. |
+| `constructor(options)` | Crée la crevette (nom, couleur, chapeau éventuel, position) et déclenche `shrimp:create`. Avec `options.saved` (sauvegarde), reprend nom, couleur, caractère, chapeau, taille et interactions. |
 | `headPos()` | Position au-dessus de la tête, où s'affichent les bulles. |
 | `say(texte, durée)` | Parle (bulle + petite voix). |
 | `goTo(point, multiplicateur)` | Fixe la destination (toujours ramenée dans le bocal). |
@@ -394,7 +434,7 @@ Il branche aussi tous les boutons : Nourrir, Changer de décor, Lancer, + Crevet
 |---|---|
 | `separation()` | Petite répulsion entre crevettes libres, pour qu'elles évitent de se coller. |
 | `removeShrimp(s, exceptAct)` | Retire définitivement une crevette : arrête son activité (sauf `exceptAct`), l'enlève de la scène, de la liste et de la caméra, puis déclenche `shrimp:remove`. |
-| `renameShrimp(s, nom)` | Renomme une crevette (ses amitiés suivent) et l'écrit dans le journal. |
+| `renameShrimp(s, nom)` | Renomme une crevette (ses amitiés suivent), l'écrit dans le journal et déclenche `shrimp:rename`. |
 
 Propriétés spéciales : `noCollide` (ignorée par les hitbox), `scooped` (prise dans l'épuisette), `removed` (a quitté le bocal), `isJeb`, `isGhost`.
 
@@ -489,13 +529,13 @@ Chaque crevette a une **gélule** (un segment avec un rayon) qui va de la tête 
 | `class Act` | Une activité en cours : `m` (participants), `data` (mémoire libre), `t` (temps), `props` (accessoires). |
 | `Act.prop(objet)` | Ajoute un accessoire à la scène, supprimé automatiquement à la fin. |
 | `Act.step(dt)` | Rassemblement, puis appel de `play` et fin si nécessaire. |
-| `Act.finish()` | Appelle `end`, nettoie les accessoires, libère les crevettes et coupe la musique. |
+| `Act.finish()` | Appelle `end`, nettoie les accessoires, libère les crevettes, coupe la musique et déclenche `act:end`. |
 | `pairStart(A, def)` | Démarrage commun aux interactions à deux : point de rencontre, face à face, ligne de journal. |
 | `GROUPS` | Liste des activités de groupe (remplie par les fichiers de `groups/`). |
 
 #### `pairs.js` — interactions à deux
 
-`PAIRS` contient 11 interactions : `salut`, `tango`, `miette`, `potins`, `saltos`, `calin`, `shifumi`, `toupie`, `course`, `philo`, `regard`. `HAND` contient les trois signes de pierre-feuille-ciseaux.
+`PAIRS` contient 11 interactions (+ `discussion`, ajoutée par `js/dialogue/engine.js`) : `salut`, `tango`, `miette`, `potins`, `saltos`, `calin`, `shifumi`, `toupie`, `course`, `philo`, `regard`. `HAND` contient les trois signes de pierre-feuille-ciseaux.
 
 #### `props.js` — accessoires partagés
 
@@ -543,10 +583,86 @@ Chaque fichier ajoute une activité à `GROUPS`. Elles demandent toutes au moins
 |---|---|
 | `startPair(def, a, b)`, `startGroup(def, crevettes)` | Lancent une activité. |
 | `schedule(dt)` | Toutes les 1,4 à 3,2 s, peut lancer une interaction à deux, souvent avec une voisine. Toutes les 35 à 55 s, lance une activité de groupe différente de la précédente. |
-| `pickWeighted(liste)` | Tirage au sort qui tient compte du `weight` de chaque activité. |
+| `pickWeighted(liste)` | Tirage au sort qui tient compte du `weight` de chaque activité (de groupe ou à deux). |
 | `forceGroup(def)` | Utilisé par le bouton « Lancer » : vérifie `canStart` (sinon affiche `cannotStart`), interrompt tout et démarre l'activité choisie. |
 
 ---
+
+### `js/dialogue`
+
+Les discussions générées. Tout est **procédural** : aucune IA en ligne, aucun coût, ça marche hors ligne.
+
+**Principe.** Quand deux crevettes se croisent, l'interaction `discussion` choisit un **sujet** selon le contexte, puis remplit ses modèles de phrases avec le vocabulaire, comme un texte à trous dont les trous se remplissent eux-mêmes. Avec quelques centaines de morceaux de phrases, on obtient des milliers de conversations différentes.
+
+Ce qui influence une discussion :
+
+- **l'affinité** : entre ami·es (affinité ≥ 4), on se salue chaleureusement, on se fait des compliments ; en froid (affinité < 0), on se répond sèchement, on se dispute… ou on se réconcilie ;
+- **le caractère** : une gourmande parle de nourriture, un philosophe de philosophie ; chaque caractère a ses tics de langage (« Pff. », « Hmm… », « 💪 »…) ;
+- **le moment** : le décor actuel (surtout s'il vient de changer), l'heure, le jour ou la nuit ;
+- **les souvenirs** : le moteur retient les derniers événements (décor précédent, crevette arrivée ou repêchée, meurtre, chat, granulés, activité de groupe, renommage) et les crevettes en reparlent. Une crevette qui a participé au karaoké ne répond pas comme une qui l'a raté.
+
+Environ 30 % des discussions **rebondissent sur un deuxième sujet** (« Au fait… », « Rien à voir, mais… »), ce qui multiplie encore les combinaisons.
+
+À la fin, l'affinité bouge : `+1` pour toute interaction, `−1` en cas de désaccord sur le décor, `−2` pour une dispute, `+1` pour un compliment ou un secret partagé, `+3` pour une réconciliation.
+
+Ordre de grandeur : le vocabulaire compte environ 900 morceaux de phrases dans 138 listes, plus 54 remarques propres aux décors et 62 tics de langage. Sur 6 000 discussions générées d'affilée, on obtient plus de 9 000 phrases différentes (sans compter les noms).
+
+#### `lexicon.js` — 📝 le vocabulaire
+
+C'est **le fichier à enrichir** pour rendre les discussions plus variées. `DIALOGUE_WORDS` contient des listes de morceaux de phrases :
+
+| Syntaxe | Remplacée par |
+|---|---|
+| `#liste#` | Un élément au hasard de `DIALOGUE_WORDS.liste` (qui peut lui-même contenir des `#…#`) |
+| `#liste.cap#` | Pareil, avec une majuscule au début |
+| `{me}`, `{you}` | La crevette qui parle, celle qui écoute |
+| `{x}` | Une autre crevette du bocal (de préférence une amie ou une ennemie de celle qui parle) |
+| `{decor}`, `{hour}` | Le décor actuel, l'heure simulée |
+| `{ev}`, `{ev2}` | Les détails d'un souvenir |
+
+Une liste peut exister en trois humeurs : `greet_warm`, `greet_neutral`, `greet_cold`. Écrire `#greet#` choisit automatiquement celle qui correspond à l'affinité entre les deux crevettes.
+
+`DIALOGUE_VOICES` donne à chaque caractère des débuts (`pre`) et des fins (`post`) de phrase. Chaque crevette en place au plus un par discussion, pour ne pas radoter.
+
+`DIALOGUE_DECOR` contient des remarques propres à chaque décor (clé = nom exact du décor). Pour un nouveau décor, il suffit d'y ajouter une ligne.
+
+Les blagues sont dans la liste `joke`, sous la forme `'Question ?|Chute.'`.
+
+#### `engine.js` — le moteur
+
+| Nom | Rôle |
+|---|---|
+| `Dialogue.converse(a, b)` | Génère une discussion complète : `{ topic, label, lines: [{ s, text }], delta }`. Avec la probabilité `CHAIN_CHANCE` (0,3), enchaîne sur un deuxième sujet. |
+| `Dialogue.thought(s)` | Génère une pensée à voix haute. Une crevette libre au hasard en dit une toutes les 6 à 14 s. |
+| `Dialogue.moodOf(s, autre)` | `'warm'`, `'neutral'` ou `'cold'` selon l'affinité. |
+| `Dialogue.remember(type, données)` | Ajoute un souvenir (les 14 derniers sont gardés). Alimenté par les Hooks. |
+| `Dialogue.addTopic(sujet)` | Ajoute un sujet de conversation. |
+| `Dialogue.words` | Raccourci vers `DIALOGUE_WORDS`, pour qu'une extension ajoute du vocabulaire. |
+| `Dialogue.preview('Nom1', 'Nom2')` | **À taper dans la console** : affiche une discussion générée sans attendre. |
+| `expand(modèle, ctx)` | Remplit un modèle de phrase. Dans une même discussion, il évite de tirer deux fois le même élément, et il évite de répéter une des 80 dernières phrases dites. |
+| `voice(s, texte, ctx)` | Ajoute le tic de langage du caractère (au plus un par crevette et par discussion). |
+| Interaction `discussion` | Ajoutée à `PAIRS` avec `weight: 5`, donc la plus fréquente des interactions à deux. Les répliques s'enchaînent dans les bulles, à un rythme qui dépend de leur longueur ; l'antenne de celle qui parle frétille. Si la caméra suit l'une des deux, les répliques s'écrivent dans le journal. |
+
+#### `topics.js` — les sujets
+
+| Sujet | Quand il sort le plus |
+|---|---|
+| `nourriture` | Si une des deux est gourmande |
+| `decor` | Juste après un changement de décor ; peut créer un désaccord |
+| `decor-detail` | Une remarque sur le décor actuel, tirée de `DIALOGUE_DECOR` |
+| `blague` | Une blague (question, « je ne sais pas », chute, réaction) ; surtout chez les fêtard·es |
+| `defi` | Un pari ou un défi ; surtout chez les sportif·ves |
+| `mue`, `cuisine`, `chat`, `enfance` | La mue, la cuisine du géant, le chat, les souvenirs de larve |
+| `musique` | Les groupes de `BANDS` (`data.js`) ; surtout chez les artistes et les fêtard·es |
+| `secret` | Une confidence ; surtout entre ami·es, jamais entre crevettes en froid (+1 d'affinité) |
+| `conseil` | Demander un conseil ; surtout aux sérieux·ses et aux philosophes |
+| `heure` | La nuit surtout |
+| `potins` | Sur une autre crevette : éloge si on l'aime, potin sinon ; la réponse dépend de ce que l'autre en pense |
+| `philo`, `reves`, `projets`, `hobby`, `geant` | Selon le caractère (philosophe, rêveur·se, sportif·ve…). Pour `hobby`, la réponse dépend du caractère de celle qui répond |
+| `compliment` | Seulement entre ami·es |
+| `dispute`, `paix` | Surtout entre crevettes en froid ; jamais enchaînés avec un autre sujet (`chain: false`) |
+| `souvenirs` | Juste après un événement marquant |
+| `halloween` | Ajouté par `halloween.js` (surtout la nuit) |
 
 ### `js/decors`
 
@@ -606,7 +722,7 @@ Tout le fichier est enfermé dans une fonction, donc il ne crée aucun nom globa
 | Nom | Rôle |
 |---|---|
 | `makePumpkin()`, `makeGhost()`, `makeBat()`, `makeCandy()` | Citrouille (lumineuse ou non), fantôme translucide, chauve-souris aux ailes animées, bonbon emballé. |
-| `makeWitchHat()`, `makeHorns()`, `makePumpkinHead()`, `makeCape()`, `COSTUMES` | Costumes. Environ 45 % des crevettes en reçoivent un à leur création. |
+| `makeWitchHat()`, `makeHorns()`, `makePumpkinHead()`, `makeCape()`, `COSTUMES` | Costumes. Environ 45 % des crevettes en reçoivent un à leur création ; une crevette rechargée retrouve le sien (`costumeName`). |
 | `Sound.STY.spooky` | Musique inquiétante pour le bal. |
 | Hooks `start`, `shrimp:create`, `decor:change`, `tick`, `frame` | Mention « édition Halloween », costumes, citrouilles dans chaque décor, coupures de courant, animation des chauves-souris et des fantômes. |
 | `setCurse(s, on)` | Rend une crevette verte pendant 14 s (sort raté). |
@@ -614,6 +730,7 @@ Tout le fichier est enfermé dans une fonction, donc il ne crée aucun nom globa
 | Meurtre au bocal | La lumière baisse et une tueuse secrète est tirée au sort. Chaque nuit, elle tue une crevette **définitivement** (`removeShrimp`). Au matin, débat puis vote : si le vote la désigne, elle part en prison ; sinon, l'innocent·e est mis·e à l'écart. Au bout de 2 nuits (`MURDER_NIGHTS`), la tueuse s'en sort. Ne se lance que s'il y a **plus de 15 crevettes** (`MURDER_MIN_SHRIMPS`), même avec le bouton « Lancer », et sort plus rarement que les autres activités (`weight: 0.35`). |
 | `trick` | Interaction à deux « Un bonbon ou un sort ! », ajoutée à `PAIRS`. |
 | Décor | « Manoir hanté de Pincevania » : manoir aux fenêtres qui clignotent, tombes, arbres morts, chaudron bouillonnant, toile d'araignée, citrouilles. |
+| Discussions | Sujet `halloween` (déguisements, chauves-souris, Gamboo) ajouté au générateur de dialogues. |
 | Activités | `bal-monstres` (danse costumée avec un fantôme), `chasse-bonbons` (3 bonbons par participant), `histoires` (veillée autour d'une citrouille et fantôme surprise), `meurtre` (voir ci-dessus). |
 
 Le fichier modifie aussi `Shrimp.prototype.addTemp` et `release` pour qu'un chapeau temporaire cache le costume de tête pendant une activité.
@@ -624,7 +741,7 @@ Le fichier modifie aussi `Shrimp.prototype.addTemp` et `release` pour qu'un chap
 
 ### `js/main.js`
 
-- Remplit le menu des activités, crée les 14 crevettes, choisit un premier décor, affiche le message de bienvenue et déclenche `start`.
+- Remplit le menu des activités, recharge la partie sauvegardée (`loadGame()`) ou crée 14 nouvelles crevettes, choisit un premier décor, affiche le message de bienvenue et déclenche `start`.
 - `frame(now)` : boucle d'animation décrite dans [Fonctionnement général](#la-boucle-danimation-jsmainjs).
 
 ---
@@ -674,6 +791,24 @@ def.start = A => pairStart(A, def); // automatique pour ce qui est déclaré dan
 PAIRS.push(def);
 ```
 
+### Sujet de discussion
+
+```js
+Dialogue.addTopic({
+  id: 'mon-sujet',
+  label: 'de mon sujet',                 // « X et Y discutent de mon sujet. »
+  weight: ctx => 1,                      // chance d'être choisi (nombre ou fonction)
+  can: ctx => true,                      // facultatif : le sujet a-t-il du sens maintenant ?
+  chain: true,                           // facultatif : false = jamais enchaîné avec un autre sujet
+  lines: ctx => {                        // répliques dites tour à tour par A puis B
+    ctx.delta += 0;                      // facultatif : changement d'affinité (toujours += ou -=)
+    return ['#mon_debut#', '#ma_reponse#', 'Phrase fixe avec {you} et {decor}.'];
+  },
+});
+```
+
+`ctx` contient `A` et `B` (les crevettes), `xs` / `x` (une autre crevette et son nom), `decor`, `decorAge`, `hour`, `night`. Le moteur ajoute parfois une salutation au début et un au revoir à la fin.
+
 ### Décor
 
 ```js
@@ -700,6 +835,13 @@ Pour que les cachettes soient utiles, place les gros objets entre 4,5 et 7,5 uni
 |---|---|
 | Des noms de crevettes | Modifier `js/core/names.js` (un nom par ligne). |
 | Des répliques, potins, groupes, équipes | Modifier les listes de `js/core/data.js`. |
+| Des phrases aux discussions générées | Ajouter des éléments dans les listes de `js/dialogue/lexicon.js`. |
+| Un sujet de discussion | `Dialogue.addTopic({...})` dans `js/dialogue/topics.js` (voir [Formats](#sujet-de-discussion)). |
+| Un tic de langage pour un caractère | `DIALOGUE_VOICES` dans `js/dialogue/lexicon.js`. |
+| Des remarques pour un décor | `DIALOGUE_DECOR` dans `js/dialogue/lexicon.js` (clé = nom exact du décor). |
+| Des blagues | La liste `joke` de `js/dialogue/lexicon.js`, au format `'Question ?|Chute.'`. |
+| Changer la fréquence des discussions | `weight` de l'interaction `discussion` dans `js/dialogue/engine.js`. |
+| Changer la fréquence de sauvegarde | `SAVE_EVERY` dans `js/ui/save.js`. |
 | Une interaction à deux | Ajouter un objet dans `PAIRS` (`js/activities/pairs.js`). |
 | Une activité de groupe | Copier un fichier de `js/activities/groups/`, changer `id` et `label`, puis ajouter sa balise `<script>` dans `index.html` **avant** `scheduler.js`. |
 | Un décor | Copier un fichier de `js/decors/themes/` et ajouter sa balise **avant** `manager.js`. |
@@ -707,7 +849,7 @@ Pour que les cachettes soient utiles, place les gros objets entre 4,5 et 7,5 uni
 | Une extension (Noël, été…) | Créer `js/seasonal/mon-extension.js` sur le modèle de `halloween.js`, puis l'ajouter juste **avant** `main.js`. |
 | Régler la taille des hitbox | `HITBOX.radius` dans `js/world/collisions.js`. |
 | Changer la durée d'un décor | `DECOR_PERIOD` dans `js/decors/manager.js`. |
-| Changer le nombre de crevettes au départ | La boucle `for` au début de `js/main.js`. |
+| Changer le nombre de crevettes au départ | La boucle `for` au début de `js/main.js` (sans effet s'il y a une sauvegarde : clique d'abord sur « Nouvelle partie »). |
 | Rendre jeb_ plus ou moins rare | `JEB_CHANCE` dans `js/shrimp/jeb.js`. |
 | Faire venir le chat plus souvent | `Cat.nextIn` dans `js/world/cat.js`. |
 | Réarranger la cuisine | `js/world/kitchen.js` (dimensions dans `ROOM`). |
@@ -720,7 +862,10 @@ Pour que les cachettes soient utiles, place les gros objets entre 4,5 et 7,5 uni
 - Les crevettes entrent en collision entre elles, mais pas avec les objets du décor : elles peuvent nager à travers un rocher ou une colonne.
 - En vitesse ×4 sur un ordinateur peu puissant, la simulation peut ralentir, car elle calcule plusieurs pas par image.
 - La musique suit l'horloge réelle : elle ne s'accélère pas en ×2 ou ×4.
-- Les victimes du meurtre et les crevettes retirées à l'épuisette ne reviennent pas : recharger la page repart de zéro.
+- Les victimes du meurtre et les crevettes retirées à l'épuisette ne reviennent pas, même en rechargeant la page (la sauvegarde s'en souvient) : utilise « Nouvelle partie » pour repartir de zéro.
+- La sauvegarde garde les crevettes et leurs affinités, mais pas la position, l'heure, le décor ni l'activité en cours.
+- Les discussions sont générées par des modèles de phrases, pas par une IA : avec le temps, on reconnaît certaines tournures. Ajouter des phrases dans `lexicon.js` repousse ce moment.
+- Ouvert en double-clic (`file://`) dans Chrome, la sauvegarde utilise `localStorage` au lieu des cookies (voir [save.js](#savejs--sauvegarde)).
 
 ---
 

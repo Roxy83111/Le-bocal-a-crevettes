@@ -150,6 +150,15 @@ body.side-closed #sideOpen {
   color: var(--coral);
   font-weight: 500;
 }
+/* Répliques d'une discussion (quand la caméra suit l'une des deux crevettes) */
+#log li.chat {
+  padding: 4px 0;
+  border-bottom-style: dashed;
+}
+#log li.chat span {
+  font-style: italic;
+  color: var(--muted);
+}
 @keyframes in {
   from {
     opacity: 0;

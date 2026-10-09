@@ -6,7 +6,11 @@
  *   'start'                     une fois, quand le bocal est prêt
  *   'shrimp:create' (shrimp)    à chaque nouvelle crevette
  *   'shrimp:remove' (shrimp)    quand une crevette quitte le bocal (épuisette, meurtre…)
+ *   'shrimp:rename' (shrimp, ancienNom)  quand on renomme une crevette
  *   'decor:change'  (D, theme)  à chaque nouveau décor (D.group, D.hide, D.ticks)
+ *   'act:end'       (act)       à la fin d'une activité (act.def, act.m, act.group)
+ *   'cat:visit'     (Cat)       quand le chat arrive dans la cuisine
+ *   'feed'          (n)         quand des granulés tombent dans le bocal
  *   'tick'          (dt)        à chaque pas de simulation (temps simulé)
  *   'frame'         (dt, rdt)   à chaque image, juste avant le rendu
  */

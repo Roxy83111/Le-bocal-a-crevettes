@@ -15,6 +15,7 @@
  *   - un événement aléatoire : la coupure de courant (avec fantôme)
  *   - Gamboo, la crevette fantôme : translucide, elle traverse les autres crevettes
  *   - le « Meurtre au bocal » (uniquement s'il y a plus de 15 crevettes)
+ *   - un sujet de discussion « Halloween » pour les conversations générées
  */
 'use strict';
 (function halloween() {
@@ -158,8 +159,16 @@
 
   /* ---------- Costumes des crevettes ---------- */
   Hooks.on('shrimp:create', s => {
-    if (Math.random() > 0.45) return;
-    const c = pick(COSTUMES);
+    let c;
+    if (s.loaded) {
+      // Crevette rechargée : on remet le même costume qu'avant (ou aucun).
+      c = COSTUMES.find(k => k.name === s.loaded.costume);
+      if (!c) return;
+    } else {
+      if (Math.random() > 0.45) return;
+      c = pick(COSTUMES);
+    }
+    s.costumeName = c.name;
     if (c.onHead && s.hat) s.hat.visible = false;
     s.costume = c.make();
     s.model.add(s.costume);
@@ -898,4 +907,30 @@
       });
     },
   });
+
+  /* ---------- Discussions générées : sujet spécial Halloween ---------- */
+  if (typeof Dialogue !== 'undefined') {
+    Object.assign(Dialogue.words, {
+      hw_open: [
+        'Tu te déguises en quoi pour Halloween ?',
+        'Tu as entendu les chauves-souris cette nuit ?',
+        'J’ai vu une citrouille me faire un clin d’œil.',
+        'Il paraît que Gamboo était une crevette comme nous, avant…',
+      ],
+      hw_costume: ['sorcière', 'homard-garou', 'momie en algues', 'vampire à pinces', 'caillou hanté', 'granulé zombie'],
+      hw_reply: [
+        'En #hw_costume#. Ça va faire peur.',
+        'Chut ! Ne parle pas trop fort, ils écoutent.',
+        'J’ai tellement peur que j’en ai perdu une antenne.',
+        'Moi je n’ai peur de rien. Sauf du noir. Et des bulles.',
+      ],
+      hw_end: ['Bouh ! 🎃', 'Je dors avec la lumière du frigo, ce soir.', 'Joyeux Halloween quand même.', 'Un bonbon ou un sort ?'],
+    });
+    Dialogue.addTopic({
+      id: 'halloween',
+      label: 'd’Halloween',
+      weight: c => (c.night ? 3 : 1.5),
+      lines: () => ['#hw_open#', '#hw_reply#', '#hw_end#'],
+    });
+  }
 })();

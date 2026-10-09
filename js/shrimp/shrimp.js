@@ -9,12 +9,15 @@ const _a = V(),
   _m = new THREE.Matrix4(),
   _q = new THREE.Quaternion();
 class Shrimp {
+  // o.saved : fiche venant d'une sauvegarde (js/ui/save.js) → mêmes nom, couleur, caractère, chapeau…
   constructor(o = {}) {
-    this.name = o.name || nextName();
-    this.color = o.color || pick(COLORS);
-    this.trait = pick(TRAITS);
+    const L = o.saved || null;
+    this.loaded = L;
+    this.name = o.name || (L && L.name) || nextName();
+    this.color = o.color || (L && L.color) || pick(COLORS);
+    this.trait = (L && L.trait) || pick(TRAITS);
     Object.assign(this, buildShrimp(this.color));
-    this.size = rnd(0.68, 0.88);
+    this.size = (L && L.size) || rnd(0.68, 0.88);
     this.root.scale.setScalar(this.size);
     this.root.userData.shrimp = this;
     this.pos = this.root.position;
@@ -39,19 +42,20 @@ class Shrimp {
     this.mode = 'swim';
     this.status = 'se balade';
     this.voice = 900 * (0.62 / this.size);
-    this.friends = {};
-    this.inter = 0;
+    this.friends = {}; // affinité : nom → score (monte quand on s'entend bien, baisse lors des disputes)
+    this.inter = (L && L.inter) || 0;
     this.temp = [];
     this.food = null;
     this.bub = null;
     this._hp = V();
     this.hatKind = null;
     this.hat = null;
-    if (Math.random() < 0.5) {
-      this.hatKind = pick(HATS);
+    if (L ? L.hat : Math.random() < 0.5) {
+      this.hatKind = L ? L.hat : pick(HATS);
       this.hat = makeHat(this.hatKind);
       this.model.add(this.hat);
     }
+    this.baseHat = this.hatKind; // chapeau d'origine (sauvegardé), sans costume saisonnier
     this.root.rotation.y = rnd(0, 6.28);
     scene.add(this.root);
     this.root.traverse(c => {
@@ -345,5 +349,6 @@ function renameShrimp(s, name) {
     }
   }
   log(`✏️ ${old} s’appelle désormais ${name}.`);
+  Hooks.emit('shrimp:rename', s, old);
   renderList();
 }

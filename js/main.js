@@ -3,10 +3,11 @@
  */
 'use strict';
 fillGroupSelect();
-for (let i = 0; i < 14; i++) new Shrimp();
+// Recharge la partie sauvegardée (js/ui/save.js) ; sinon, 14 nouvelles crevettes.
+if (!loadGame()) for (let i = 0; i < 14; i++) new Shrimp();
 setDecor(rint(0, THEMES.length - 1), true);
 renderList();
-log(`🫙 Bienvenue dans le bocal. ${shrimps.length} crevettes s’installent.`, 'decor');
+if (!gameLoaded) log(`🫙 Bienvenue dans le bocal. ${shrimps.length} crevettes s’installent.`, 'decor');
 Hooks.emit('start');
 let last = performance.now(),
   uiT = 0;

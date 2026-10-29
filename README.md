@@ -62,7 +62,7 @@ Double-clique sur `index.html` : la page s'ouvre dans ton navigateur.
 | **Chat** | De temps en temps, le chat saute sur le plan de travail, fixe le bocal, miaule… et les crevettes paniquent. |
 | **Physique** | Chaque crevette a une hitbox en forme de gélule, donc les crevettes ne peuvent pas se traverser. |
 | **Ambiance** | Vagues à la surface, bulles, rayons de lumière, cycle jour/nuit (1 seconde réelle = 2 minutes simulées). |
-| **Son** | Voix, « pop » et musiques générées en direct, sans aucun fichier audio. |
+| **Son** | Voix (chaque crevette a sa hauteur, qui varie à chaque syllabe), « pop », miaulement et musiques : des enregistrements libres de droits (CC0 / domaine public), dans `sons/`. |
 | **Halloween** | Extension supprimable : costumes, chauves-souris, fantômes, Gamboo la crevette fantôme, décor hanté, 1 interaction et 4 activités, dont le **meurtre au bocal** (morts définitives, seulement à plus de 15 crevettes). |
 
 ---
@@ -100,6 +100,7 @@ shrimp/
 ├── index.html                   Structure de la page + ordre de chargement des scripts
 ├── README.md                    Ce document
 ├── LICENSE                      Licence MIT
+├── sons/                        Sons CC0 / domaine public (sources dans sons/CREDITS.txt)
 ├── css/
 │   ├── base.css                 Palette, polices, boutons
 │   ├── scene-labels.css         Bulles de dialogue, émotes, noms au-dessus de la 3D
@@ -112,7 +113,7 @@ shrimp/
     │   ├── names.js             📝 Liste des noms des crevettes (à modifier librement)
     │   ├── scene.js             Moteur 3D, lumières, bocal, eau, sable
     │   ├── data.js              Tous les textes et listes (noms, répliques…)
-    │   └── sound.js             Son génératif
+    │   └── sound.js             Lecture des sons
     ├── ui/
     │   ├── overlay.js           Bulles, émotes et noms en HTML
     │   ├── camera.js            Caméra orbitale et suivi
@@ -308,20 +309,18 @@ Tout le contenu textuel, facile à enrichir.
 
 Une simple liste `SHRIMP_NAMES`, un nom par ligne, faite pour être modifiée à la main. Les nouvelles crevettes piochent dedans sans doublon ; quand la liste est épuisée, elles s'appellent « Crevette n°… ».
 
-#### `sound.js` — son génératif
+#### `sound.js` — sons
 
-Objet `Sound`, basé sur la Web Audio API. Aucun fichier son.
+Objet `Sound`, qui joue les fichiers de `sons/` avec de simples éléments `<audio>` : ils marchent aussi quand la page est ouverte en double-clic (`file://`), contrairement à un chargement par la Web Audio API. Tous les sons sont sous licence CC0 ou dans le domaine public ; les sources sont listées dans `sons/CREDITS.txt`.
 
 | Méthode | Rôle |
 |---|---|
-| `init()` | Crée le contexte audio et un tampon de bruit. |
 | `toggle()` | Active ou coupe le son (l'audio ne démarre qu'après un clic). |
-| `env()`, `tone()`, `noise()`, `kick()` | Briques de synthèse : enveloppe, note, bruit filtré, grosse caisse. |
-| `chirp(hauteur)` | Petite voix de crevette (« blblbl »). |
-| `pop()` | Bruit de bulle qui éclate. |
-| `STY` | Styles musicaux : `rock`, `conga`, `mystic`, `chic`, `valse` (+ `spooky` ajouté par Halloween). Chacun a un tempo, une tonalité, une gamme, une suite d'accords et des percussions ou non. |
-| `startMusic(style, instruments)`, `stopMusic()` | Lance ou arrête une musique. Les instruments présents changent le son (trompette, guitare, maracas…). |
-| `schedule()`, `step()` | Séquenceur appelé toutes les 50 ms : batterie, basse, mélodie improvisée. |
+| `play(nom, vitesse, volume)` | Joue `sons/<nom>.ogg`. La vitesse change aussi la hauteur, comme une bande accélérée. |
+| `chirp(hauteur)` | Petite voix de crevette (« blblbl ») : 2 à 4 syllabes, chacune à une hauteur un peu différente autour de la voix de la crevette. |
+| `pop()`, `meow()` | Bulle qui éclate, miaulement du chat. |
+| `startMusic(style)`, `stopMusic()` | Lance en boucle ou arrête `sons/<style>.ogg` : `rock`, `conga`, `mystic`, `chic`, `valse`, `spooky`. |
+| `BPM`, `bpm(style)` | Tempo mesuré de chaque boucle (le concert fait sautiller le groupe en rythme). |
 
 ---
 
@@ -496,7 +495,6 @@ Chaque crevette a une **gélule** (un segment avec un rayon) qui va de la tête 
 | `buildCat(robe)` | Modèle low poly : corps, tête avec oreilles, yeux et moustaches, 4 pattes articulées, queue en 7 segments. |
 | `Cat` | État du chat : `away` → `jump` → `walk` → `sit` → `leave` → `down`, plus le délai avant la prochaine visite (`nextIn`, 80 à 150 s simulées). |
 | `catVisit()` | Fait venir le chat tout de suite (utilisable dans la console). |
-| `catMeow()` | Miaulement synthétisé (si le son est activé). |
 | Hook `tick` | Saut sur le plan de travail, marche, s'assoit face au bocal, fixe les crevettes (qui paniquent), miaule, repart et saute derrière. |
 
 #### `net.js` — l'épuisette

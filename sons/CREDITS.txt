@@ -1,0 +1,21 @@
+Tous ces sons sont sous licence CC0 ou dans le domaine public : usage libre, même commercial, sans crédit obligatoire.
+Ils ont été convertis en OGG Vorbis (volume des musiques égalisé, miaulement découpé), sans autre modification.
+
+voix.ogg   « pluck_001 », Interface Sounds — Kenney (kenney.nl), CC0
+pop.ogg    « drop_002 », Interface Sounds — Kenney (kenney.nl), CC0
+miaou.ogg  « Meow of a pleading cat » (extrait 6,7 s → 7,6 s) — Wikimedia Commons, domaine public
+           https://commons.wikimedia.org/wiki/File:Meow_of_a_pleading_cat.oga
+
+Musiques (OpenGameArt, CC0) :
+rock.ogg    « JRPG Epic Rock Battle Theme #1 » (boucle) — HydroGene
+            https://opengameart.org/content/jrpg-epic-rock-battle-theme-1
+conga.ogg   « Funky Menu Loop » (version longue)
+            https://opengameart.org/content/funky-menu-loop
+mystic.ogg  « Heavenly Loop » — isaiah658
+            https://opengameart.org/content/heavenly-loop
+chic.ogg    « Jazz improvisation looped » — Alex McCulloch / Pro Sensory (crédit apprécié, pas obligatoire)
+            https://opengameart.org/content/jazz-improvisation-looped
+valse.ogg   « Snowfall » (version en boucle) — Kistol
+            https://opengameart.org/content/snowfall
+spooky.ogg  « Spooky loop & bomba32 » (spookloopable) — wipics & StumpyStrust
+            https://opengameart.org/content/spooky-loop-bomba32-wipicks-vs-stumpystrust

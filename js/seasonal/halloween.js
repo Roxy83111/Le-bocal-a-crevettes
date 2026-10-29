@@ -154,9 +154,6 @@
     return g;
   }
 
-  /* ---------- Sons ---------- */
-  Sound.STY.spooky = { bpm: 96, root: 92.5, scale: [0, 1, 4, 5, 7, 8, 11], prog: [0, 1, 0, 8], drums: 1 };
-
   /* ---------- Costumes des crevettes ---------- */
   Hooks.on('shrimp:create', s => {
     let c;
@@ -548,7 +545,7 @@
     play(A, t, dt) {
       if (!A.music) {
         A.music = true;
-        Sound.startMusic('spooky', ['clavier']);
+        Sound.startMusic('spooky');
       }
       const n = A.m.length;
       A.m.forEach((s, i) => {

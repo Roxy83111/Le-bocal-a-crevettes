@@ -118,15 +118,6 @@ function catVisit() {
   Hooks.emit('cat:visit', Cat);
 }
 
-function catMeow() {
-  if (!Sound.on) return;
-  const c = Sound.ctx,
-    now = c.currentTime;
-  const o = Sound.tone(520, now, 0.7, 'sawtooth', 0.06);
-  o.frequency.linearRampToValueAtTime(820, now + 0.25);
-  o.frequency.linearRampToValueAtTime(480, now + 0.65);
-}
-
 Hooks.on('tick', dt => {
   if (Cat.state === 'away') {
     Cat.nextIn -= dt;
@@ -181,7 +172,7 @@ Hooks.on('tick', dt => {
     m.head.rotation.x = 0.35 + Math.sin(simTime * 0.7) * 0.05;
     at(Cat, t, 1.2, () => {
       speakAt(() => m.head.getWorldPosition(V()).add(V(0, 6, 0)), 'Miaou…', 2.2);
-      catMeow();
+      Sound.meow();
       shrimps.forEach(s => {
         if (s.busy) return;
         if (Math.random() < 0.5)
@@ -198,7 +189,7 @@ Hooks.on('tick', dt => {
         pick(['…sushi.', 'Miaaaou.', '*se lèche la patte*', 'Un jour…']),
         2,
       );
-      catMeow();
+      Sound.meow();
     });
     if (t > 7.5) {
       Cat.state = 'leave';

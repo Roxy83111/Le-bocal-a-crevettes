@@ -42,7 +42,7 @@ GROUPS.push({
     const D = A.data;
     if (!A.music) {
       A.music = true;
-      Sound.startMusic('rock', D.kinds);
+      Sound.startMusic('rock');
     }
     const beat = (t * Sound.bpm('rock')) / 60;
     D.band.forEach((s, i) => {
